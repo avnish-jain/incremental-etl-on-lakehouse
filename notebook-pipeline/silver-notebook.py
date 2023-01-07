@@ -30,6 +30,7 @@ silver_checkpoint_path = parent_path + 'stream/silver_cdc/' + now + 'checkpoint_
 # MAGIC     , cdc_timestamp       timestamp
 # MAGIC     , insert_timestamp    timestamp
 # MAGIC )
+# MAGIC tblproperties (delta.enableChangeDataFeed = true, delta.autoOptimize.optimizeWrite = true, delta.autoOptimize.autoCompact = true);
 
 # COMMAND ----------
 
