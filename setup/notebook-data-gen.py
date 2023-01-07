@@ -3,14 +3,6 @@
 
 # COMMAND ----------
 
-# MAGIC %md 
-# MAGIC 
-# MAGIC # Mock Data Generation 
-# MAGIC 
-# MAGIC Generates random CDC data and stores into DBFS
-
-# COMMAND ----------
-
 from faker import Faker
 import random
 import datetime
@@ -25,7 +17,7 @@ import json
 out_file_path = 'dbfs:/avnishjain/repos/db-cdc-log-medallion/data/raw/'
 num_files = 3
 num_records_per_file = 20
-sleep_between_files = 10
+sleep_between_files = 5
 
 # RANDOM GENERATION 
 id_gen_randomizer_percentage = 0.8

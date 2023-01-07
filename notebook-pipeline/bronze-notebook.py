@@ -4,14 +4,16 @@
 # COMMAND ----------
 
 from pyspark.sql.functions import *
+import datetime
 
 # COMMAND ----------
 
 # AUTOLOADER
+now = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
 parent_path = 'dbfs:/avnishjain/repos/db-cdc-log-medallion/'
 raw_data_path = parent_path + 'data/raw/'
-bronze_schema_path = parent_path + 'autoloader/bronze_cdc_1/json/schema_path/'
-bronze_checkpoint_path = parent_path + 'autoloader/bronze_cdc_1/json/checkpoint_path/'
+bronze_schema_path = parent_path + 'autoloader/bronze_cdc/' + now + '/schema_path/'
+bronze_checkpoint_path = parent_path + 'autoloader/bronze_cdc/' + now + '/checkpoint_path/'
 
 # COMMAND ----------
 
@@ -53,11 +55,12 @@ raw_cdc_stream = spark.readStream \
                 .option("cloudFiles.schemaHints", "id BIGINT, num_visitors BIGINT, visit_timestamp TIMESTAMP, cdc_timestamp TIMESTAMP") \
                 .option("cloudFiles.schemaLocation",  bronze_schema_path) \
                 .load(raw_data_path) \
+                .withColumn("data_hash", md5(concat(col("id"), col("country"), col("district"), col("visit_timestamp"), col("num_visitors")))) \
                 .withColumn("file_name", input_file_name()) \
                 .withColumn("insert_timestamp", current_timestamp()) \
                 .writeStream    \
                 .option("checkpointLocation", bronze_checkpoint_path) \
-                .trigger(processingTime='10 seconds') \
+                .trigger(processingTime='5 seconds') \
                 .table("db_gen_cdc_demo.bronze_cdc")
 
 time.sleep(10)
@@ -66,6 +69,9 @@ time.sleep(10)
 
 # MAGIC %sql
 # MAGIC 
+# MAGIC -- let's make sure our table has the proper compaction settings to support streaming
+# MAGIC alter table db_gen_cdc_demo.bronze_cdc set tblproperties (delta.autoOptimize.optimizeWrite = true, delta.autoOptimize.autoCompact = true);
+# MAGIC 
 # MAGIC select    id
 # MAGIC         , country
 # MAGIC         , district
@@ -73,6 +79,7 @@ time.sleep(10)
 # MAGIC         , num_visitors
 # MAGIC         , cdc_operation
 # MAGIC         , cdc_timestamp
+# MAGIC         , data_hash
 # MAGIC         , file_name
 # MAGIC         , insert_timestamp 
 # MAGIC from db_gen_cdc_demo.bronze_cdc
