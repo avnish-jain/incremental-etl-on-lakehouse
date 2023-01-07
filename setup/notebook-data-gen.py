@@ -15,6 +15,7 @@ from faker import Faker
 import random
 import datetime
 import time
+import json
 
 # COMMAND ----------
 
@@ -36,7 +37,7 @@ dict_record = {}
 fake = Faker()
 
 # DATA
-schema = [('id, int'), ('country', 'string'), ('district', 'string'), ('visit_datetime', 'date'), ('num_visitors', 'int')]
+column_names = ['id','country','district','visit_timestamp','num_visitors','cdc_operation','cdc_timestamp']
 country_list = ['England', 'Wales', 'Scotland', 'Northern Ireland']
 district_list = ['District_1', 'District_2', 'District_3', 'District_4', 'District_5', 'District_6', 'District_7', 'District_8', 'District_9', 'District_10']
 
@@ -45,22 +46,22 @@ district_list = ['District_1', 'District_2', 'District_3', 'District_4', 'Distri
 
 def gen_random_id():
     max_rand_id = int(num_files * num_records_per_file * id_gen_randomizer_percentage)
-    return str(random.randint(1, max_rand_id))
+    return random.randint(1, max_rand_id)
 
 def gen_random_country():
     index = random.randint(0, len(country_list)-1)
-    return str(country_list[index])
+    return country_list[index]
 
 def gen_random_district():
     index = random.randint(0, len(district_list)-1)
-    return str(district_list[index])
+    return district_list[index]
 
 def gen_random_datetime():
     num_seconds = random.randint(0, num_seconds_in_day)
-    return str((now - datetime.timedelta(seconds=num_seconds)).strftime('%Y-%m-%d %H:%M:%S'))
+    return (now - datetime.timedelta(seconds=num_seconds)).strftime('%Y-%m-%d %H:%M:%S')
 
 def gen_random_num_visitors():
-    return str(random.randint(100, 1000))
+    return random.randint(100, 1000)
 
 def gen_random_record(record_id):
     record_country = gen_random_country()
@@ -72,20 +73,36 @@ def gen_random_record(record_id):
 
 # COMMAND ----------
 
+def format_record(record, format_type='json'):
+    if format_type == 'csv':
+        str_record = ','.join(record)
+        return str_record
+    else:
+        dict_record = dict(zip(column_names, record))
+        return json.dumps(dict_record)
+
+def deformat_record(record, format_type='json'):
+    if format_type == 'csv':
+        return record.split(',')
+    else:
+        return list(json.loads(record).values())
+
 def gen_cdc_insert_record(record_id):
     record = gen_random_record(record_id)
     record.append('INSERT')
-    str_record = ','.join(record)
+    record.append(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'))
+    str_record = format_record(record, 'json')
     return str_record
 
 def gen_cdc_update_record(record_id, record):
-    record_list = record.split(',')
+    record_list = deformat_record(record, 'json')
     new_visit = gen_random_num_visitors()
     while(new_visit == record_list[-2]):
         new_visit = gen_random_num_visitors()
-    record_list[-2] = new_visit
-    record_list[-1] = 'UPDATE'
-    str_record = ','.join(record_list)
+    record_list[-3] = new_visit
+    record_list[-2] = 'UPDATE'
+    record_list[-1] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+    str_record = format_record(record_list, 'json')
     return str_record
 
 def gen_random_cdc_record():
@@ -104,16 +121,22 @@ def gen_random_cdc_record():
 
 # COMMAND ----------
 
-def gen_file_name():
+def gen_file_name(extension='.json'):
     file_datetime = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-    return 'db_cdc_log_medallion_'+file_datetime+'.csv'
+    return 'db_cdc_log_medallion_'+file_datetime+extension
+
+def format_file_content(content, format_type='json'):
+    if format_type == 'csv':
+        return '/n'.join(content)
+    else:
+        return '[' + ','.join(content) + ']'
 
 def gen_file_content():
-    contents = ''
+    contents = []
     for _ in range(num_records_per_file):
-        line = gen_random_cdc_record() + '\n'
-        contents = contents + line
-    return contents
+        record = gen_random_cdc_record()
+        contents.append(record)
+    return format_file_content(contents, 'json')
 
 def clear_dbfs_location(path):
     dbutils.fs.rm(path, True)
