@@ -152,9 +152,6 @@ def write_s3_location(bucket, name, body):
 
 # COMMAND ----------
 
-#clear_dbfs_location(out_file_path)
-#assert (dbutils.fs.ls(out_file_path) == [])
-
 dict_record = {}
 for _ in range(num_files):
     file_name = gen_file_name()

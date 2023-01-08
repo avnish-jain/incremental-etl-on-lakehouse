@@ -1,4 +1,12 @@
 # Databricks notebook source
+# MAGIC %run ../setup/notebook-lib-install
+
+# COMMAND ----------
+
+display_slide('1cdpi5arOlmtS80qH45uo-G9NWuHU7KXIxYy6xfqMXWg', '10') 
+
+# COMMAND ----------
+
 from pyspark.sql.functions import *
 import datetime
 import time

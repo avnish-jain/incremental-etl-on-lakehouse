@@ -45,6 +45,7 @@ def merge_and_dedup_stream(df, i):
                                             , country
                                             , district
                                             , visit_timestamp
+                                            -- Convert data timestamps to UTC timestamp
                                             , to_utc_timestamp(visit_timestamp, 'Europe/Paris') as utc_visit_timestamp
                                             , num_visitors
                                             , file_name
@@ -54,6 +55,7 @@ def merge_and_dedup_stream(df, i):
                                             , cdc_operation
                                         FROM
                                         (
+                                                -- Remove duplicates within a batch (e.g. quick succession UPDATES)
                                                 SELECT    *
                                                         , ROW_NUMBER() OVER (PARTITION BY id ORDER BY cdc_timestamp DESC, cdc_operation DESC) as rnk
                                                 FROM silver_cdc_microbatch
@@ -64,6 +66,7 @@ def merge_and_dedup_stream(df, i):
                                     WHEN MATCHED 
                                         AND source.cdc_operation = 'DELETE'
                                         THEN DELETE
+                                    -- Only processes UPDATEs when there is a data change / removes inter-batch duplicates
                                     WHEN MATCHED 
                                         AND source.cdc_operation = 'UPDATE' 
                                         AND source.data_hash <> target.data_hash 
@@ -92,9 +95,9 @@ spark.readStream \
 # MAGIC     select id 
 # MAGIC     from 
 # MAGIC     (
-# MAGIC         select id, count(*) from avnish_jain.db_gen_cdc_demo.bronze_cdc
+# MAGIC         select id, count(*) as cnt from avnish_jain.db_gen_cdc_demo.bronze_cdc
 # MAGIC         group by id
-# MAGIC         order by 2 desc
+# MAGIC         order by cnt desc, id desc
 # MAGIC         limit 1
 # MAGIC     )
 # MAGIC )
@@ -112,9 +115,9 @@ spark.readStream \
 # MAGIC     select id 
 # MAGIC     from 
 # MAGIC     (
-# MAGIC         select id, count(*) from avnish_jain.db_gen_cdc_demo.bronze_cdc
+# MAGIC         select id, count(*) as cnt from avnish_jain.db_gen_cdc_demo.bronze_cdc
 # MAGIC         group by id
-# MAGIC         order by 2 desc
+# MAGIC         order by cnt desc, id desc
 # MAGIC         limit 1
 # MAGIC     )
 # MAGIC )
