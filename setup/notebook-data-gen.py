@@ -8,14 +8,19 @@ import random
 import datetime
 import time
 import json
+import boto3
 
 # COMMAND ----------
 
 ### CONSTANTS
 
+#AWS
+s3_bucket = 'databricks-avnishjain'
+out_file_key = 'repo/db-cdc-log-medallion/data/raw/'
+
 # OUTPUTS
 out_file_path = 'dbfs:/avnishjain/repos/db-cdc-log-medallion/data/raw/'
-num_files = 3
+num_files = 20
 num_records_per_file = 20
 sleep_between_files = 5
 
@@ -137,19 +142,22 @@ def clear_dbfs_location(path):
 def write_dbfs_location(path, name, body):
     dbutils.fs.put(path+name, body, True)
 
+def write_s3_location(bucket, name, body):
+    client = boto3.client('s3')
+    client.put_object(
+        Body=body, 
+        Bucket=bucket, 
+        Key=name
+    )
+
 # COMMAND ----------
 
-clear_dbfs_location(out_file_path)
-assert (dbutils.fs.ls(out_file_path) == [])
+#clear_dbfs_location(out_file_path)
+#assert (dbutils.fs.ls(out_file_path) == [])
 
 dict_record = {}
 for _ in range(num_files):
     file_name = gen_file_name()
     file_content = gen_file_content()
-    write_dbfs_location(out_file_path, file_name, file_content)
+    write_s3_location(s3_bucket, out_file_key + file_name, file_content)
     time.sleep(sleep_between_files)
-
-# COMMAND ----------
-
-assert( len(dbutils.fs.ls(out_file_path)) == num_files)
-dbutils.fs.ls(out_file_path)

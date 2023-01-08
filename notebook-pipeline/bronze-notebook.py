@@ -1,16 +1,14 @@
 # Databricks notebook source
-# MAGIC %run ../setup/notebook-data-gen
-
-# COMMAND ----------
-
 from pyspark.sql.functions import *
 import datetime
+import time
 
 # COMMAND ----------
 
 # AUTOLOADER
 now = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-parent_path = 'dbfs:/avnishjain/repos/db-cdc-log-medallion/'
+dbfs_parent_path = 'dbfs:/avnishjain/repos/db-cdc-log-medallion/'
+parent_path = 's3://databricks-avnishjain/repo/db-cdc-log-medallion/'
 raw_data_path = parent_path + 'data/raw/'
 bronze_schema_path = parent_path + 'autoloader/bronze_cdc/' + now + '/schema_path/'
 bronze_checkpoint_path = parent_path + 'autoloader/bronze_cdc/' + now + '/checkpoint_path/'
@@ -40,11 +38,15 @@ display(sample_update)
 # COMMAND ----------
 
 # MAGIC %sql 
+# MAGIC use catalog avnish_jain;
+# MAGIC drop database if exists db_gen_cdc_demo cascade;
+# MAGIC 
 # MAGIC create database if not exists db_gen_cdc_demo;
 # MAGIC drop table if exists db_gen_cdc_demo.bronze_cdc;
 
 # COMMAND ----------
 
+# DBTITLE 1,Files landed will be automatically loaded, converted to Delta and augmented with Databricks Auto Loader
 raw_cdc_stream = spark.readStream \
                 .format("cloudFiles") \
                 .option("cloudFiles.format", "json") \
@@ -61,16 +63,12 @@ raw_cdc_stream = spark.readStream \
                 .writeStream    \
                 .option("checkpointLocation", bronze_checkpoint_path) \
                 .trigger(processingTime='5 seconds') \
-                .table("db_gen_cdc_demo.bronze_cdc")
-
-time.sleep(10)
+                .table("avnish_jain.db_gen_cdc_demo.bronze_cdc")
 
 # COMMAND ----------
 
+# DBTITLE 1,Let's see what our Bronze table looks like
 # MAGIC %sql
-# MAGIC 
-# MAGIC -- let's make sure our table has the proper compaction settings to support streaming
-# MAGIC alter table db_gen_cdc_demo.bronze_cdc set tblproperties (delta.autoOptimize.optimizeWrite = true, delta.autoOptimize.autoCompact = true);
 # MAGIC 
 # MAGIC select    id
 # MAGIC         , country
@@ -82,6 +80,5 @@ time.sleep(10)
 # MAGIC         , data_hash
 # MAGIC         , file_name
 # MAGIC         , insert_timestamp 
-# MAGIC from db_gen_cdc_demo.bronze_cdc
-# MAGIC order by cdc_timestamp
+# MAGIC from avnish_jain.db_gen_cdc_demo.bronze_cdc
 # MAGIC ;
