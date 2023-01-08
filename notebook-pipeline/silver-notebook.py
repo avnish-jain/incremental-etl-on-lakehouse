@@ -35,6 +35,7 @@ silver_checkpoint_path = parent_path + 'stream/silver_cdc/' + now + 'checkpoint_
 
 # COMMAND ----------
 
+# DBTITLE 1,Merge stream based on CDC operation and de-duplicate within and across batches
 def merge_and_dedup_stream(df, i):
     df.createOrReplaceTempView("silver_cdc_microbatch")
     df._jdf.sparkSession().sql("""

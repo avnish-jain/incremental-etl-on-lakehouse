@@ -20,7 +20,7 @@ out_file_key = 'repo/db-cdc-log-medallion/data/raw/'
 
 # OUTPUTS
 out_file_path = 'dbfs:/avnishjain/repos/db-cdc-log-medallion/data/raw/'
-num_files = 20
+num_files = 5
 num_records_per_file = 20
 sleep_between_files = 5
 

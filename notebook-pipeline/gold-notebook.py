@@ -110,48 +110,49 @@ spark.readStream \
 
 # MAGIC %sql
 # MAGIC 
-# MAGIC select * 
-# MAGIC from avnish_jain.db_gen_cdc_demo.gold_cdc_agg
-# MAGIC order by  country;
+# MAGIC select      *
+# MAGIC from        avnish_jain.db_gen_cdc_demo.gold_cdc_agg
+# MAGIC order by    country;
 
 # COMMAND ----------
 
 # DBTITLE 1,Let's add a new data file with an INSERT and UPDATEs
-s3_bucket = 'databricks-avnishjain'
-key_name = 'repo/db-cdc-log-medallion/data/raw/'
-file_name = 'custom_cdc_' + now + '.json'
+# now = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+# s3_bucket = 'databricks-avnishjain'
+# key_name = 'repo/db-cdc-log-medallion/data/raw/'
+# file_name = 'custom_cdc_' + now + '.json'
 
-body = """
-[
-    {
-        "id": 7, 
-        "country": "England", 
-        "district": "District_2", 
-        "visit_timestamp": "2023-01-08 11:02:17", 
-        "num_visitors": 100000, 
-        "cdc_operation": "UPDATE", 
-        "cdc_timestamp": "2023-01-08 21:32:22.987432"
-    }
-    ,
-    {
-        "id": -1, 
-        "country": "Australia", 
-        "district": "District_1", 
-        "visit_timestamp": "2023-01-08 09:03:12", 
-        "num_visitors": 10000, 
-        "cdc_operation": "INSERT", 
-        "cdc_timestamp": "2023-01-08 21:32:22.987506"
-        }
-]
-"""
+# body = """
+# [
+#     {
+#         "id": 7, 
+#         "country": "England", 
+#         "district": "District_2", 
+#         "visit_timestamp": "2023-01-08 11:02:17", 
+#         "num_visitors": 100000, 
+#         "cdc_operation": "UPDATE", 
+#         "cdc_timestamp": "2023-01-08 21:32:22.987432"
+#     }
+#     ,
+#     {
+#         "id": -1, 
+#         "country": "Australia", 
+#         "district": "District_2", 
+#         "visit_timestamp": "2023-01-08 09:03:12", 
+#         "num_visitors": 10000, 
+#         "cdc_operation": "INSERT", 
+#         "cdc_timestamp": "2023-01-08 21:32:22.987506"
+#         }
+# ]
+# """
 
 
-client = boto3.client('s3')
-client.put_object(
-        Body=body, 
-        Bucket=s3_bucket, 
-        Key=key_name + file_name
-    )
+# client = boto3.client('s3')
+# client.put_object(
+#         Body=body, 
+#         Bucket=s3_bucket, 
+#         Key=key_name + file_name
+#     )
 
 # COMMAND ----------
 
