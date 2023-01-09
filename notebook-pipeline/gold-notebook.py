@@ -129,7 +129,7 @@ spark.readStream \
 #         "country": "England", 
 #         "district": "District_2", 
 #         "visit_timestamp": "2023-01-08 11:02:17", 
-#         "num_visitors": 100000, 
+#         "num_visitors": 10000, 
 #         "cdc_operation": "UPDATE", 
 #         "cdc_timestamp": "2023-01-08 21:32:22.987432"
 #     }
