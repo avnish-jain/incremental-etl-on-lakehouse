@@ -81,7 +81,6 @@ spark.readStream \
        .writeStream \
        .foreachBatch(merge_and_dedup_stream) \
        .option("checkpointLocation", silver_checkpoint_path) \
-       .trigger(processingTime='5 seconds') \
      .start()
 
 # COMMAND ----------

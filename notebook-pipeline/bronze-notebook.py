@@ -70,7 +70,6 @@ raw_cdc_stream = spark.readStream \
                 .withColumn("insert_timestamp", current_timestamp()) \
                 .writeStream    \
                 .option("checkpointLocation", bronze_checkpoint_path) \
-                .trigger(processingTime='5 seconds') \
                 .table("avnish_jain.db_gen_cdc_demo.bronze_cdc")
 
 # COMMAND ----------

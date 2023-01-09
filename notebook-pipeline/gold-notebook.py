@@ -103,7 +103,6 @@ spark.readStream \
        .writeStream \
        .foreachBatch(merge_into_gold_agg) \
        .option("checkpointLocation", gold_checkpoint_path) \
-       .trigger(processingTime='5 seconds') \
       .start()
 
 # COMMAND ----------
