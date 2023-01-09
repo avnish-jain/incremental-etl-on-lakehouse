@@ -69,10 +69,10 @@ raw_cdc_stream = spark.readStream \
 
 Using Databricks Autoloader to load data into a Bronze layer has several benefits:
 
-- Automation: With Autoloader, you can set up a continuous data ingestion process without the need for manual intervention. This can save time and reduce the risk of errors.
-- Scalability: Autoloader can handle large volumes of data and can scale up or down as needed to meet changing data ingestion demands.
-- Data transformation: Autoloader allows you to perform basic data transformations, such as filtering, renaming, and aggregating, as part of the ingestion process. This can save time and resources by reducing the need for additional data transformation steps later on.
-- Connectivity: Autoloader supports a wide range of data sources, including databases, cloud storage, and streaming platforms, making it easy to connect to and load data from multiple sources.
+- **Automation**: With Autoloader, you can set up a continuous data ingestion process without the need for manual intervention. This can save time and reduce the risk of errors.
+- **Scalability**: Autoloader can handle large volumes of data and can scale up or down as needed to meet changing data ingestion demands.
+- **Data transformation**: Autoloader allows you to perform basic data transformations, such as filtering, renaming, and aggregating, as part of the ingestion process. This can save time and resources by reducing the need for additional data transformation steps later on.
+- **Connectivity**: Autoloader supports a wide range of data sources, including databases, cloud storage, and streaming platforms, making it easy to connect to and load data from multiple sources.
 
 Overall, Databricks Autoloader is a useful tool for quickly and efficiently ingesting data into a Bronze layer for further analysis and processing.
 
@@ -128,9 +128,9 @@ delta.enableChangeDataFeed = true
 
 Using Delta Change Data Feed has several benefits:
 
-- Improve ETL Pipelines: Process less data during your ETL pipelines to increase efficiency and performance
-- Unify batch and streaming: Apply a common change format for both batch and streaming updates, inserts and deletes
-- Optimize BI on your Lakehouse: Incrementally update the data as opposed to full refresh
+- **Improve ETL Pipelines**: Process less data during your ETL pipelines to increase efficiency and performance
+- **Unify batch and streaming**: Apply a common change format for both batch and streaming updates, inserts and deletes
+- **Optimize BI on your Lakehouse**: Incrementally update the data as opposed to full refresh
 
 ## Conclusion
 
