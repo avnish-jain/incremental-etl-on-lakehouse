@@ -1,4 +1,4 @@
-# Demo - Ingesting and aggregating database CDC logs into your Lakehouse Platform
+# Ingesting and aggregating database CDC logs into your Lakehouse Platform
 
 In this guide, we will walk through the process of ingesting database Change Data Capture (CDC) logs into Databricks and performing basic analysis on the data.
 
@@ -10,8 +10,17 @@ In this guide, we will walk through the process of ingesting database Change Dat
 - A Databricks cluster
   - Unity Catalog enabled
   - attached with an Instance Profile with appropriate S3 privileges 
-  
-Note: In the Databricks E2 Field Eng West workspace, the S3 bucket has been configured to provide the `shard-demo-s3-access` IAM role and Instance Profile with the appropriate privileges.
+
+The notebooks have already been configured to write to the following S3 bucket and location:
+[s3://databricks-avnishjain/repo/db-cdc-log-medallion/data/raw/](https://s3.console.aws.amazon.com/s3/buckets/databricks-avnishjain?region=us-west-2&prefix=repo/db-cdc-log-medallion/data/raw/&showversions=false).
+
+The output tables can be queried in Databricks SQL under the following namespace:
+`avnish_jain.db_gen_cdc_demo.bronze_cdc`
+
+In the Databricks E2 Field Eng West Workspace, please ensure your cluster that you have created is **Unity Catalog enabled** and has the **shard-demo-s3-access** Instance Profile attached.
+
+In the E2 Field Eng West AWS Account, the S3 bucket has been configured to provide the pre-configured `shard-demo-s3-access` IAM role and Instance Profile with the appropriate privileges.
+
 
 ## Mock Data Generation
 
@@ -104,7 +113,6 @@ spark.readStream \
        .option("checkpointLocation", <silver_checkpoint_path>) \
      .start()
 ```
-
 
 ## Aggregating into a Gold Layer Table
 
