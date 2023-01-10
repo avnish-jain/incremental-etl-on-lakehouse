@@ -45,7 +45,6 @@ display_slide('1cdpi5arOlmtS80qH45uo-G9NWuHU7KXIxYy6xfqMXWg', '9')
 # MAGIC         , _commit_version
 # MAGIC         , _commit_timestamp 
 # MAGIC from table_changes('avnish_jain.db_gen_cdc_demo.silver_cdc', 1)
-# MAGIC where id =  43
 # MAGIC order by _commit_version desc, _commit_timestamp desc, _change_type asc
 # MAGIC ;
 
@@ -61,30 +60,18 @@ def merge_into_gold_agg(df, i):
                                         select country, sum(delta_visitors) as delta_visitors 
                                         from
                                         (
-                                            select country, delta_visitors from
-                                            (
-                                                select pre.country as country, (post.num_visitors - pre.num_visitors) as delta_visitors 
-                                                from
-                                                -- Join update pre-image to post-image to calculate difference for incremental refresh
-                                                (select * from gold_cdc_microbatch where _change_type = 'update_preimage') pre
-                                                inner join
-                                                (select * from gold_cdc_microbatch where _change_type = 'update_postimage') post
-                                                on pre.id = post.id
-                                                and pre._commit_version = post._commit_version
-                                            ) 
-                                            union all
-                                            (
-                                                select country, num_visitors as delta_visitors
-                                                from gold_cdc_microbatch inserts
-                                                where _change_type = 'insert'
-                                            ) 
-                                            union all
-                                            (
-                                                -- Multiply by -1 in order to subtract against total
-                                                select country, num_visitors * -1 as delta_visitors
-                                                from gold_cdc_microbatch deletes
-                                                where _change_type = 'delete'
-                                            )
+                                            select    country
+                                                    , case
+                                                            when _change_type = 'update_preimage'
+                                                            then -1 * num_visitors
+
+                                                            when _change_type = 'delete'
+                                                            then -1 * num_visitors
+
+                                                            -- Handles case when _change_type = 'update_postimage' and 'insert'
+                                                            else num_visitors
+                                                    end as delta_visitors 
+                                            from gold_cdc_microbatch
                                         ) 
                                         group by country
                                     ) as source
@@ -116,42 +103,42 @@ spark.readStream \
 # COMMAND ----------
 
 # DBTITLE 1,Let's add a new data file with an INSERT and UPDATEs
-# now = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-# s3_bucket = 'databricks-avnishjain'
-# key_name = 'repo/db-cdc-log-medallion/data/raw/'
-# file_name = 'custom_cdc_' + now + '.json'
+now = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+s3_bucket = 'databricks-avnishjain'
+key_name = 'repo/db-cdc-log-medallion/data/raw/'
+file_name = 'custom_cdc_' + now + '.json'
 
-# body = """
-# [
-#     {
-#         "id": 7, 
-#         "country": "England", 
-#         "district": "District_2", 
-#         "visit_timestamp": "2023-01-08 11:02:17", 
-#         "num_visitors": 10000, 
-#         "cdc_operation": "UPDATE", 
-#         "cdc_timestamp": "2023-01-08 21:32:22.987432"
-#     }
-#     ,
-#     {
-#         "id": -1, 
-#         "country": "Australia", 
-#         "district": "District_2", 
-#         "visit_timestamp": "2023-01-08 09:03:12", 
-#         "num_visitors": 10000, 
-#         "cdc_operation": "INSERT", 
-#         "cdc_timestamp": "2023-01-08 21:32:22.987506"
-#         }
-# ]
-# """
+body = """
+[
+    {
+        "id": 7, 
+        "country": "England", 
+        "district": "District_2", 
+        "visit_timestamp": "2023-01-08 11:02:17", 
+        "num_visitors": 10000, 
+        "cdc_operation": "UPDATE", 
+        "cdc_timestamp": "2023-01-08 21:32:22.987432"
+    }
+    ,
+    {
+        "id": -1, 
+        "country": "Australia", 
+        "district": "District_2", 
+        "visit_timestamp": "2023-01-08 09:03:12", 
+        "num_visitors": 10000, 
+        "cdc_operation": "INSERT", 
+        "cdc_timestamp": "2023-01-08 21:32:22.987506"
+        }
+]
+"""
 
 
-# client = boto3.client('s3')
-# client.put_object(
-#         Body=body, 
-#         Bucket=s3_bucket, 
-#         Key=key_name + file_name
-#     )
+client = boto3.client('s3')
+client.put_object(
+        Body=body, 
+        Bucket=s3_bucket, 
+        Key=key_name + file_name
+    )
 
 # COMMAND ----------
 

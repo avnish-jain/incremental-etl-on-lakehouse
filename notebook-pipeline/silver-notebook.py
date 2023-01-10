@@ -70,7 +70,7 @@ def merge_and_dedup_stream(df, i):
                                     -- Only processes UPDATEs when there is a data change / removes inter-batch duplicates
                                     WHEN MATCHED 
                                         AND source.cdc_operation = 'UPDATE' 
-                                        AND source.data_hash <> target.data_hash 
+                                        AND source.data_hash <> target.data_hash
                                         THEN UPDATE SET *
                                     WHEN NOT MATCHED
                                         THEN INSERT *
