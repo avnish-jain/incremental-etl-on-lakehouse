@@ -1,0 +1,182 @@
+[
+{
+ "id": 7,
+ "country": "England",
+ "district": "District_2",
+ "visit_timestamp": "2023-01-08 11:02:17",
+ "num_visitors": 247,
+ "cdc_operation": "INSERT",
+ "cdc_timestamp": "2023-01-08 21:32:22.987432"
+},
+{
+ "id": 143,
+ "country": "Wales",
+ "district": "District_9",
+ "visit_timestamp": "2023-01-08 09:03:12",
+ "num_visitors": 670,
+ "cdc_operation": "INSERT",
+ "cdc_timestamp": "2023-01-08 21:32:22.987506"
+},
+{
+ "id": 7,
+ "country": "England",
+ "district": "District_2",
+ "visit_timestamp": "2023-01-08 11:02:17",
+ "num_visitors": 934,
+ "cdc_operation": "UPDATE",
+ "cdc_timestamp": "2023-01-08 21:32:27.756295"
+},
+{
+ "id": 254,
+ "country": "England",
+ "district": "District_10",
+ "visit_timestamp": "2023-01-08 00:52:36",
+ "num_visitors": 599,
+ "cdc_operation": "INSERT",
+ "cdc_timestamp": "2023-01-08 21:32:22.987623"
+},
+{
+ "id": 244,
+ "country": "Wales",
+ "district": "District_6",
+ "visit_timestamp": "2023-01-08 04:26:30",
+ "num_visitors": 975,
+ "cdc_operation": "INSERT",
+ "cdc_timestamp": "2023-01-08 21:32:22.987676"
+},
+{
+ "id": 205,
+ "country": "Scotland",
+ "district": "District_1",
+ "visit_timestamp": "2023-01-08 19:59:52",
+ "num_visitors": 439,
+ "cdc_operation": "INSERT",
+ "cdc_timestamp": "2023-01-08 21:32:22.987727"
+},
+{
+ "id": 287,
+ "country": "Northern Ireland",
+ "district": "District_8",
+ "visit_timestamp": "2023-01-08 09:07:19",
+ "num_visitors": 826,
+ "cdc_operation": "INSERT",
+ "cdc_timestamp": "2023-01-08 21:32:22.987776"
+},
+{
+ "id": 227,
+ "country": "England",
+ "district": "District_5",
+ "visit_timestamp": "2023-01-08 08:43:18",
+ "num_visitors": 806,
+ "cdc_operation": "INSERT",
+ "cdc_timestamp": "2023-01-08 21:32:22.987827"
+},
+{
+ "id": 5,
+ "country": "Scotland",
+ "district": "District_4",
+ "visit_timestamp": "2023-01-08 12:00:13",
+ "num_visitors": 992,
+ "cdc_operation": "INSERT",
+ "cdc_timestamp": "2023-01-08 21:32:22.987930"
+},
+{
+ "id": 88,
+ "country": "Scotland",
+ "district": "District_6",
+ "visit_timestamp": "2023-01-08 13:02:47",
+ "num_visitors": 503,
+ "cdc_operation": "INSERT",
+ "cdc_timestamp": "2023-01-08 21:32:22.987980"
+},
+{
+ "id": 132,
+ "country": "England",
+ "district": "District_1",
+ "visit_timestamp": "2023-01-08 01:24:01",
+ "num_visitors": 978,
+ "cdc_operation": "INSERT",
+ "cdc_timestamp": "2023-01-08 21:32:22.988029"
+},
+{
+ "id": 176,
+ "country": "Wales",
+ "district": "District_1",
+ "visit_timestamp": "2023-01-07 22:31:29",
+ "num_visitors": 400,
+ "cdc_operation": "INSERT",
+ "cdc_timestamp": "2023-01-08 21:32:22.988077"
+},
+{
+ "id": 206,
+ "country": "England",
+ "district": "District_3",
+ "visit_timestamp": "2023-01-08 02:49:36",
+ "num_visitors": 391,
+ "cdc_operation": "INSERT",
+ "cdc_timestamp": "2023-01-08 21:32:22.988125"
+},
+{
+ "id": 298,
+ "country": "Northern Ireland",
+ "district": "District_8",
+ "visit_timestamp": "2023-01-07 23:34:18",
+ "num_visitors": 963,
+ "cdc_operation": "INSERT",
+ "cdc_timestamp": "2023-01-08 21:32:22.988171"
+},
+{
+ "id": 99,
+ "country": "Northern Ireland",
+ "district": "District_10",
+ "visit_timestamp": "2023-01-08 03:24:18",
+ "num_visitors": 673,
+ "cdc_operation": "INSERT",
+ "cdc_timestamp": "2023-01-08 21:32:22.988218"
+},
+{
+ "id": 44,
+ "country": "England",
+ "district": "District_8",
+ "visit_timestamp": "2023-01-08 16:22:49",
+ "num_visitors": 462,
+ "cdc_operation": "INSERT",
+ "cdc_timestamp": "2023-01-08 21:32:22.988267"
+},
+{
+ "id": 131,
+ "country": "Wales",
+ "district": "District_3",
+ "visit_timestamp": "2023-01-08 20:26:50",
+ "num_visitors": 870,
+ "cdc_operation": "INSERT",
+ "cdc_timestamp": "2023-01-08 21:32:22.988343"
+},
+{
+ "id": 53,
+ "country": "Wales",
+ "district": "District_10",
+ "visit_timestamp": "2023-01-08 15:49:03",
+ "num_visitors": 988,
+ "cdc_operation": "INSERT",
+ "cdc_timestamp": "2023-01-08 21:32:22.988413"
+},
+{
+ "id": 81,
+ "country": "Northern Ireland",
+ "district": "District_7",
+ "visit_timestamp": "2023-01-08 16:27:44",
+ "num_visitors": 858,
+ "cdc_operation": "INSERT",
+ "cdc_timestamp": "2023-01-08 21:32:22.988462"
+},
+{
+ "id": 298,
+ "country": "Northern Ireland",
+ "district": "District_8",
+ "visit_timestamp": "2023-01-07 23:34:18",
+ "num_visitors": 994,
+ "cdc_operation": "UPDATE",
+ "cdc_timestamp": "2023-01-08 21:32:23.850593"
+}
+]
