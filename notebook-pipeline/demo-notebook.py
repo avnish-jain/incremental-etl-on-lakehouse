@@ -46,28 +46,28 @@ table_name = 'cdc'
 # DBTITLE 1,Below configuration variables are derived from the above inputs
 now = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
 
-# Derived Configurations
+# AWS S3 Configurations
 s3_parent_path = 's3://{0}/{1}'.format(s3_bucket, s3_parent_key)
 s3_raw_data_path = s3_parent_path + 'data/raw/'
 s3_raw_data_key = s3_parent_key + 'data/raw/'
 
-# UC Derived Configurations
+# Unity Catalog (UC) Configurations
 bronze_table = '{0}.{1}.bronze_{2}'.format(catalog_name, database_name, table_name)
 silver_table = '{0}.{1}.silver_{2}'.format(catalog_name, database_name, table_name)
 gold_table = '{0}.{1}.gold_{2}'.format(catalog_name, database_name, table_name)
 
-# UC Derived Configurations made available in Spark Conf for SQL parameterization
+# UC made available in Spark Conf for SQL parameterization
 spark.conf.set('db.catalog_name', catalog_name)
 spark.conf.set('db.database_name', database_name)
 spark.conf.set('db.bronze_table', bronze_table)
 spark.conf.set('db.silver_table', silver_table)
 spark.conf.set('db.gold_table', gold_table)
 
-#Autoloader Derived Configurations
+#Autoloader Configurations
 bronze_schema_path = s3_parent_path + 'autoloader/{0}/{1}/{2}/bronze_{3}/schema_path/'.format(now, catalog_name, database_name, table_name)
 bronze_checkpoint_path = s3_parent_path + 'autoloader/{0}/{1}/{2}/bronze_{3}/checkpoint_path/'.format(now, catalog_name, database_name, table_name)
 
-#Delta Stream Derived Configurations
+#Delta Stream Configurations
 silver_checkpoint_path = s3_parent_path + 'streams/{0}/{1}/{2}/silver_{3}/checkpoint_path/'.format(now, catalog_name, database_name, table_name)
 gold_checkpoint_path = s3_parent_path + 'streams/{0}/{1}/{2}/gold_{3}/checkpoint_path/'.format(now, catalog_name, database_name, table_name)
 
