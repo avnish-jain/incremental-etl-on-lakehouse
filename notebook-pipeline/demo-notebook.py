@@ -5,20 +5,22 @@
 
 # MAGIC %md 
 # MAGIC 
-# MAGIC # [TBD] - Simplify, optimize and improve your data pipelines with incremental ETL on the Lakehouse 
+# MAGIC # Simplify, optimize and improve your data pipelines with incremental ETL on the Lakehouse 
 # MAGIC 
 # MAGIC ETL (Extract, Transform, Load) pipelines are vital to the functioning of many businesses, however with large-scale data volumes, it can be quite difficult to process and refresh critical reporting tables. This can lead to significant delays in deriving important insights from data to drive strategic decision making. 
 # MAGIC 
 # MAGIC One solution to this problem is to incrementally transform your tables across your data platform. This approach involves modifying only the necessary parts of the table that have been impacted by data change, as opposed to adopting a full refresh strategy which can be computationally intensive, expensive, and time consuming. 
 # MAGIC 
+# MAGIC In this guide, we will walkthrough how to build an event-driven, incremental ETL data pipeline on the Databricks Lakehouse platform. 
+# MAGIC 
 # MAGIC ![Diagram - Database CDC Log Ingest into Databricks](https://www.databricks.com/wp-content/uploads/2022/03/delta-lake-medallion-architecture-2.jpeg)
 # MAGIC 
-# MAGIC In this guide, we will walk through an example of how to configure an incremental ETL pipeline for a source providing database change data capture (CDC) logs. We will ingest this data into a Bronze layer, curate further into a Silver Layer and finally aggregate into a business reporting table in the Gold layer. 
 # MAGIC 
-# MAGIC By adopting an incremental ETL strategy (as opposed to the more computationally intensive full refresh), we can realize several technical and business advantages:
-# MAGIC - Reducing time to more derive accurate insight
-# MAGIC - Improve overall performance and cost-efficiency
-# MAGIC - Minimize risk of errors and improve trust in data
+# MAGIC We will leverage the Medallion Architecture design pattern to organize our data tables in our Lakehouse.
+# MAGIC 
+# MAGIC - **Ingest source data into the Bronze layer:** Data will be incrementally ingested and appended into the Bronze layer using Databricks Autoloader.
+# MAGIC - **Curate and conform data into the Silver layer:** The CDC data captured in our Bronze table will be used to re-create an up-to-date snapshot of our external operational database, using Spark Structured Streaming to incrementally process new rows in batches or continuously.
+# MAGIC - **Aggregating into a business level table in the Gold layer:** We will incrementally perform the necessary aggregations over our Silver table data, leveraging Delta Change Data Feed (CDF) to track changes.
 
 # COMMAND ----------
 
@@ -29,7 +31,11 @@ import datetime
 
 # DBTITLE 1,[ACTION] - Input Necessary Configurations
 #Input AWS Configurations
+
+# Omit the "s3://"
 s3_bucket = 'databricks-avnishjain'
+
+# Ensure path does not begin with a "/" but ends with a "/"
 s3_parent_key = 'repo/db-cdc-log-medallion/'
 
 #Input Unity Catalog Configurations
@@ -293,11 +299,11 @@ spark.readStream \
 # MAGIC 
 # MAGIC As we are performing UPSERTS to our Silver table, we can capture those changes incrementally through the use of the Delta Change Data Feed (CDF). CDF is a feature that allows you to continuously track and expose the changes made to a Delta table as a stream.
 # MAGIC 
-# MAGIC Using Delta Change Data Feed has several benefits:
+# MAGIC Using Delta Change Data Feed brings you full CDC capabilities for any data managed in your Lakehouse, bringing several benefits:
 # MAGIC 
-# MAGIC - **Improve ETL Pipelines**: Process less data during your ETL pipelines to increase efficiency and performance
-# MAGIC - **Unify batch and streaming**: Apply a common change format for both batch and streaming updates, inserts and deletes
-# MAGIC - **Optimize BI on your Lakehouse**: Incrementally update the data as opposed to full refresh
+# MAGIC - **Improve ETL Pipelines:** Process less data during your ETL pipelines to increase efficiency and performance
+# MAGIC - **Unify batch and streaming:** Apply a common change format for both batch and streaming updates, inserts and deletes
+# MAGIC - **Optimize BI on your Lakehouse:** Incrementally update your pipelines as opposed to slow full refreshes or expensive dynamic query computation, over cheap cloud object storage and an open file format, lowering storage costs and removing vendor lock-in
 # MAGIC 
 # MAGIC We enabled CDF on our Silver table on DDL creation: 
 # MAGIC 
@@ -344,9 +350,9 @@ spark.readStream \
 # MAGIC         , district
 # MAGIC         , visit_timestamp
 # MAGIC         , num_visitors
-# MAGIC         , _change_type
-# MAGIC         , _commit_version
-# MAGIC         , _commit_timestamp 
+# MAGIC         , _change_type          -- Databricks CDF special columns denoting if its an insert, previous image of the update, post image of the update or delete
+# MAGIC         , _commit_version       -- Databricks CDF special column denoting the commit version; previous image and post image of the update will have the same commit version
+# MAGIC         , _commit_timestamp     -- Databricks CDF special colummn denoting commit timestamp
 # MAGIC from table_changes('${db.silver_table}', 1)
 # MAGIC order by _commit_version desc, _commit_timestamp desc, _change_type asc
 # MAGIC ;
@@ -429,10 +435,10 @@ new_file_create_timestamp = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'
 new_file_name = 'custom_cdc_' + new_file_create_timestamp + '.json'
 
 # New Data File will consist of the following records
-#       ID -1   = Insert                  [Australia, +10K Visitors]
-#       ID 7    = Update                  [England, 934 -> 10,934 = +10K Visitors]
-#       ID -1   = Intra-Batch Duplicate   [Australia, +10K Visitors]
-#       ID 298  = Inter-Batch Duplicate   [Northern Ireland, 994]
+#       ID -1   = INSERT                  [Australia, +10K Visitors]
+#       ID 7    = UPDATE                  [England, 934 -> 10,934 = +10K Visitors]
+#       ID -1   = INTRA-BATCH DUPLICATE   [Australia, +10K Visitors]
+#       ID 298  = INTER-BATCH DUPLICATE   [Northern Ireland, 994]
 
 new_file_body = """
 [

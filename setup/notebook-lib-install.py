@@ -1,8 +1,4 @@
 # Databricks notebook source
-pip install Faker==15.3.4
-
-# COMMAND ----------
-
 import boto3
 
 # COMMAND ----------
