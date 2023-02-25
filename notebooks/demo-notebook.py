@@ -1,5 +1,5 @@
 # Databricks notebook source
-# MAGIC %run ../setup/notebook-lib-install
+# MAGIC %run ../setup/incremental-etl-helper
 
 # COMMAND ----------
 
@@ -7,55 +7,77 @@
 # MAGIC 
 # MAGIC # Simplify, optimize and improve your data pipelines with incremental ETL on the Lakehouse 
 # MAGIC 
-# MAGIC ETL (Extract, Transform, Load) pipelines are vital to the functioning of many businesses, however with large-scale data volumes, it can be quite difficult to process and refresh critical reporting tables. This can lead to significant delays in deriving important insights from data to drive strategic decision making. 
-# MAGIC 
-# MAGIC One solution to this problem is to incrementally transform your tables across your data platform. This approach involves modifying only the necessary parts of the table that have been impacted by data change, as opposed to adopting a full refresh strategy which can be computationally intensive, expensive, and time consuming. 
-# MAGIC 
 # MAGIC In this guide, we will walkthrough how to build an event-driven, incremental ETL data pipeline on the Databricks Lakehouse platform. 
 # MAGIC 
 # MAGIC ![Diagram - Database CDC Log Ingest into Databricks](https://www.databricks.com/wp-content/uploads/2022/03/delta-lake-medallion-architecture-2.jpeg)
 # MAGIC 
-# MAGIC 
 # MAGIC We will leverage the Medallion Architecture design pattern to organize our data tables in our Lakehouse.
+# MAGIC 
 # MAGIC 
 # MAGIC - **Ingest source data into the Bronze layer:** Data will be incrementally ingested and appended into the Bronze layer using Databricks Autoloader.
 # MAGIC - **Curate and conform data into the Silver layer:** The CDC data captured in our Bronze table will be used to re-create an up-to-date snapshot of our external operational database, using Spark Structured Streaming to incrementally process new rows in batches or continuously.
 # MAGIC - **Aggregating into a business level table in the Gold layer:** We will incrementally perform the necessary aggregations over our Silver table data, leveraging Delta Change Data Feed (CDF) to track changes.
+# MAGIC 
+# MAGIC ### Prerequisites
+# MAGIC 
+# MAGIC 
+# MAGIC - A Databricks account
+# MAGIC - A Databricks cluster
+# MAGIC   - with Unity Catalog enabled
+# MAGIC   - attached with an Instance Profile with appropriate S3 privileges 
+# MAGIC 
+# MAGIC 
+# MAGIC ### [ACTION REQUIRED] - Input Necessary Configurations
+# MAGIC 
+# MAGIC Once the above pre-requisites have been met, please ensure you fill in the `config-notebook` with the necessary input configurations. 
+# MAGIC 
+# MAGIC ```
+# MAGIC #Input AWS Configurations
+# MAGIC 
+# MAGIC # Omit the "s3://"
+# MAGIC s3_bucket = '<bucket name>'
+# MAGIC 
+# MAGIC # Ensure path does not begin with a "/"
+# MAGIC s3_parent_key = '<parent key>'
+# MAGIC 
+# MAGIC #Input Unity Catalog Configurations
+# MAGIC 
+# MAGIC #Note: Ensure database does not have any objects you need persisted
+# MAGIC #This Demo notebook will perform a DROP CASCADE on the database
+# MAGIC 
+# MAGIC catalog_name = '<catalog name>'
+# MAGIC database_name = '<database name>'
+# MAGIC table_name = '<table name suffix>'
+# MAGIC ```
+# MAGIC 
+# MAGIC For more information on these parameters, please refer to the README file
+
+# COMMAND ----------
+
+# MAGIC %run ./config-notebook
 
 # COMMAND ----------
 
 from pyspark.sql.functions import *
 import datetime
+import os
 
 # COMMAND ----------
 
-# DBTITLE 1,[ACTION] - Input Necessary Configurations
-#Input AWS Configurations
-
-# Omit the "s3://"
-s3_bucket = 'databricks-avnishjain'
-
-# Ensure path does not begin with a "/" but ends with a "/"
-s3_parent_key = 'repo/db-cdc-log-medallion/'
-
-#Input Unity Catalog Configurations
-
-#Note: Ensure database does not have any objects you need persisted
-#This Demo notebook will perform a DROP CASCADE on the database
-
-catalog_name = 'avnish_jain'
-database_name = 'db_gen_cdc_demo'
-table_name = 'cdc'
-
-# COMMAND ----------
-
-# DBTITLE 1,Below configuration variables are derived from the above inputs
+# DBTITLE 1,Below configuration variables are derived from the input configurations
 now = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
 
+# Strip any leading/trailing whitespaces
+s3_bucket = s3_bucket.strip()
+s3_parent_key = s3_parent_key.strip()
+catalog_name = catalog_name.strip()
+database_name = database_name.strip()
+table_name = table_name.strip()
+
 # AWS S3 Configurations
-s3_parent_path = 's3://{0}/{1}'.format(s3_bucket, s3_parent_key)
-s3_raw_data_path = s3_parent_path + 'data/raw/'
-s3_raw_data_key = s3_parent_key + 'data/raw/'
+s3_parent_path = os.path.join('s3://', s3_bucket, s3_parent_key)
+s3_raw_data_path = os.path.join(s3_parent_path, 'data/raw/')
+s3_raw_data_key = os.path.join(s3_parent_key, 'data/raw/')
 
 # Unity Catalog (UC) Configurations
 bronze_table = '{0}.{1}.bronze_{2}'.format(catalog_name, database_name, table_name)
@@ -64,18 +86,18 @@ gold_table = '{0}.{1}.gold_{2}'.format(catalog_name, database_name, table_name)
 
 # UC made available in Spark Conf for SQL parameterization
 spark.conf.set('db.catalog_name', catalog_name)
-spark.conf.set('db.database_name', database_name)
+spark.conf.set('db.database_name', f"{catalog_name}.{database_name}")
 spark.conf.set('db.bronze_table', bronze_table)
 spark.conf.set('db.silver_table', silver_table)
 spark.conf.set('db.gold_table', gold_table)
 
-#Autoloader Configurations
-bronze_schema_path = s3_parent_path + 'autoloader/{0}/{1}/{2}/bronze_{3}/schema_path/'.format(now, catalog_name, database_name, table_name)
-bronze_checkpoint_path = s3_parent_path + 'autoloader/{0}/{1}/{2}/bronze_{3}/checkpoint_path/'.format(now, catalog_name, database_name, table_name)
+# Autoloader Configurations
+bronze_schema_path = os.path.join(s3_parent_path,'autoloader/{0}/{1}/{2}/bronze_{3}/schema_path/'.format(now, catalog_name, database_name, table_name))
+bronze_checkpoint_path = os.path.join(s3_parent_path,'autoloader/{0}/{1}/{2}/bronze_{3}/checkpoint_path/'.format(now, catalog_name, database_name, table_name))
 
-#Delta Stream Configurations
-silver_checkpoint_path = s3_parent_path + 'streams/{0}/{1}/{2}/silver_{3}/checkpoint_path/'.format(now, catalog_name, database_name, table_name)
-gold_checkpoint_path = s3_parent_path + 'streams/{0}/{1}/{2}/gold_{3}/checkpoint_path/'.format(now, catalog_name, database_name, table_name)
+# Delta Stream Configurations
+silver_checkpoint_path = os.path.join(s3_parent_path,'streams/{0}/{1}/{2}/silver_{3}/checkpoint_path/'.format(now, catalog_name, database_name, table_name))
+gold_checkpoint_path = os.path.join(s3_parent_path,'streams/{0}/{1}/{2}/gold_{3}/checkpoint_path/'.format(now, catalog_name, database_name, table_name))
 
 # COMMAND ----------
 
@@ -92,14 +114,20 @@ gold_checkpoint_path = s3_parent_path + 'streams/{0}/{1}/{2}/gold_{3}/checkpoint
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC 
+# MAGIC ## Uploading Sample CDC Logs Data into S3
+# MAGIC 
+# MAGIC To simulate Database CDC Logs, a sample file has been generated and kept in the `/data/` folder in the Git repository.
+# MAGIC 
+# MAGIC We will upload this initial raw file to our defined S3 path to mock our input from source.
+
+# COMMAND ----------
+
 # DBTITLE 1,Upload DB CDC Log sample file to S3 path
 delete_files(s3_bucket, s3_raw_data_key)
 body = open('../data/db_cdc_log_demo_sample.json').read()
 upload_file(s3_bucket, s3_raw_data_key, 'db_cdc_log_demo_sample_' + now + '.json', body)
-
-# COMMAND ----------
-
-display_slide('1cdpi5arOlmtS80qH45uo-G9NWuHU7KXIxYy6xfqMXWg', '10') 
 
 # COMMAND ----------
 
@@ -485,6 +513,15 @@ new_file_body = """
 """
 
 upload_file(s3_bucket, s3_raw_data_key, new_file_name, new_file_body)
+
+# COMMAND ----------
+
+# DBTITLE 1,Let's see how our Gold Table has handled our edge-cases!
+# MAGIC %sql
+# MAGIC 
+# MAGIC select      *
+# MAGIC from        ${db.gold_table}
+# MAGIC order by    country;
 
 # COMMAND ----------
 
