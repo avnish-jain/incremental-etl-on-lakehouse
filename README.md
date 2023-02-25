@@ -2,6 +2,8 @@
 
 In this guide, we will walkthrough how to build an incremental ETL data pipeline on the Databricks Lakehouse platform.
 
+Futher details can be found here in this blogpost: <insert link to blogpost>
+
 ## Use-Case Overview
 
 Your organization would like to understand and report on the total number of visitors each country receives. 
