@@ -9,6 +9,7 @@
 # Omit the "s3://"
 s3_bucket = 'databricks-avnishjain'
 
+# This is just the path, do not repeat the bucket name.
 # Ensure path does not begin with a "/"
 s3_parent_key = 'repo/db-cdc-log-medallion/'
 
@@ -24,4 +25,7 @@ table_name = 'cdc'
 # COMMAND ----------
 
 assert_s3_bucket(s3_bucket)
-assert_s3_parent_key(s3_parent_key)
+assert_s3_parent_key(s3_parent_key, s3_bucket)
+assert_uc_object_name(catalog_name, 'Catalog')
+assert_uc_object_name(database_name, 'Database')
+assert_uc_object_name(table_name, 'Table')

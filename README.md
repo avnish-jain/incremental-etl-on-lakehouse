@@ -27,6 +27,7 @@ Once the above pre-requisites have been met, please ensure you fill in the `conf
 # Omit the "s3://"
 s3_bucket = '<bucket name>'
 
+# This is just the path, do not repeat the bucket name.
 # Ensure path does not begin with a "/"
 s3_parent_key = '<parent key>'
 

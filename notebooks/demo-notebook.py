@@ -37,6 +37,7 @@
 # MAGIC # Omit the "s3://"
 # MAGIC s3_bucket = '<bucket name>'
 # MAGIC 
+# MAGIC # This is just the path, do not repeat the bucket name.
 # MAGIC # Ensure path does not begin with a "/"
 # MAGIC s3_parent_key = '<parent key>'
 # MAGIC 
