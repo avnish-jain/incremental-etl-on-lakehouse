@@ -45,7 +45,7 @@ For more details on these parameters, please refer to the below table:
 | Parameter Name | Data Type | Description | Example Value |
 |---|---|---|---|
 | s3_bucket | String | Name of the S3 Bucket where sample data files will be written into. **Omit the "s3://".** | databricks-incremental-etl-demo-bucket |
-| s3_parent_key | String | Name of the S3 Prefix within the bucket where files will be created under. **Ensure it does not begin with "/" ** |  incremental-etl/demo/ |
+| s3_parent_key | String | Name of the S3 Prefix within the bucket where files will be created under. **Ensure it does not begin with "/"** |  incremental-etl/demo/ |
 | catalog_name | String | Name of the Unity Catalog catalog name. This can be an existing or new catalog name. |  databricks-demo-catalog |
 | database_name | String | Name of the Unity Catalog database name. **Please ensure this is a new database or one where you don't need the objects persisted.** | incremental-etl-db |
 | table_name | String | Name of the suffix used for the table names. "Bronze_", "Silver_" and "Gold_" will be automatically added in as prefixes in the notebooks. | visitor_tbl |
