@@ -10,7 +10,7 @@ Your organization would like to understand and report on the total number of vis
 
 The data comes from an operational database that tracks the number of visitors in a given district at a point in time. The database has been configured to enable Change Data Capture (CDC) transaction logs, which you ingest into your Lakehouse to clean and report on. The CDC logs include new visitor measurements inserted to the operational database, as well as updates and corrections to previously recorded measurements. Additionally, it is not guaranteed that each record is delivered only once with the source system potentially providing you duplicates within a log file (intra batch/window duplicates) as well as across files (inter-batch/window duplicates). 
 
-### Prerequisites
+## Prerequisites
 
 - A Databricks account
 - A Databricks cluster
@@ -51,7 +51,7 @@ For more details on these parameters, please refer to the below table:
 | table_name | String | Name of the suffix used for the table names. "Bronze_", "Silver_" and "Gold_" will be automatically added in as prefixes in the notebooks. | visitor_tbl |
 
 
-### How To Run
+## How To Run
 
 Once the `config-notebook` has been filled with the neccessary input configurations, you need only to run the `demo-notebook` which will make calls to the other notebooks. 
 
