@@ -7,19 +7,19 @@
 #Input AWS Configurations
 
 # Omit the "s3://"
-s3_bucket = 'databricks-avnishjain'
+s3_bucket = 'your-bucket-name'
 
 # This is just the path, do not repeat the bucket name.
 # Ensure path does not begin with a "/"
-s3_parent_key = 'repo/db-cdc-log-medallion/'
+s3_parent_key = 'path/to/parent-key/'
 
 #Input Unity Catalog Configurations
 
 #Note: Ensure database does not have any objects you need persisted
 #This Demo notebook will perform a DROP CASCADE on the database
 
-catalog_name = 'avnish_jain'
-database_name = 'db_gen_cdc_demo'
+catalog_name = 'your-catalog-name'
+database_name = 'your-database-name'
 table_name = 'cdc'
 
 # COMMAND ----------

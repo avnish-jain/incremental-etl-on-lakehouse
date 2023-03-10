@@ -9,17 +9,13 @@
 # MAGIC 
 # MAGIC In this guide, we will walkthrough how to build an event-driven, incremental ETL data pipeline on the Databricks Lakehouse platform. 
 # MAGIC 
-# MAGIC ![Diagram - Database CDC Log Ingest into Databricks](https://www.databricks.com/wp-content/uploads/2022/03/delta-lake-medallion-architecture-2.jpeg)
-# MAGIC 
 # MAGIC We will leverage the Medallion Architecture design pattern to organize our data tables in our Lakehouse.
-# MAGIC 
 # MAGIC 
 # MAGIC - **Ingest source data into the Bronze layer:** Data will be incrementally ingested and appended into the Bronze layer using Databricks Autoloader.
 # MAGIC - **Curate and conform data into the Silver layer:** The CDC data captured in our Bronze table will be used to re-create an up-to-date snapshot of our external operational database, using Spark Structured Streaming to incrementally process new rows in batches or continuously.
 # MAGIC - **Aggregating into a business level table in the Gold layer:** We will incrementally perform the necessary aggregations over our Silver table data, leveraging Delta Change Data Feed (CDF) to track changes.
 # MAGIC 
 # MAGIC ### Prerequisites
-# MAGIC 
 # MAGIC 
 # MAGIC - A Databricks account
 # MAGIC - A Databricks cluster
@@ -344,16 +340,6 @@ spark.readStream \
 # MAGIC       delta.enableChangeDataFeed = true
 # MAGIC );
 # MAGIC ```
-# MAGIC 
-# MAGIC Please see below for an example of what the Change Data Feed output looks like after a series of DML operations:
-# MAGIC 
-# MAGIC - Record ID A2 is being **updated** *from* value B1 *to* Z2
-# MAGIC - Record ID A3 is being **deleted**
-# MAGIC - Record ID A4 is a new **insert**
-# MAGIC 
-# MAGIC Note: Record ID A1 is unchanged (hence does not appear in the CDF output)
-# MAGIC 
-# MAGIC ![CDF Example](https://delta.io/static/3ea5dbdda80a607a7db9ed70217965af/00d43/cdf-delta.png)
 
 # COMMAND ----------
 
