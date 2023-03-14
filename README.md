@@ -2,7 +2,7 @@
 
 In this guide, we will walkthrough how to build an incremental ETL data pipeline on the Databricks Lakehouse platform.
 
-Futher details can be found here in this blogpost: <insert link to blogpost>
+Futher details can be found here in this [blogpost.](https://medium.com/@avnishjain22/simplify-optimise-and-improve-your-data-pipelines-with-incremental-etl-on-the-lakehouse-61b279afadea)
 
 ## Use-Case Overview
 
